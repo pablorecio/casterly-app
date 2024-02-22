@@ -41,7 +41,7 @@ def test_combine_lines(lines, expected):
     ("path", "lines"),
     [
         (
-            "invoice_parser/tests/parser/data/receipt_01.pdf",
+            "invoice_parser/tests/parser/data/mercadona_01.pdf",
             [
                 "MERCADONA, S.A.   A-46103834",
                 "C/ PRAGA S/N",
