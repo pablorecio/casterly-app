@@ -3,9 +3,32 @@ repos:
     rev: v2.3.0
     hooks:
     -   id: check-yaml
+    -   id: debug-statements
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
 -   repo: https://github.com/psf/black
     rev: 22.10.0
     hooks:
     -   id: black
+-   repo: https://github.com/pycqa/isort
+    rev: 5.11.5
+    hooks:
+    -   id: isort
+        name: isort
+        files: invoice_parser
+-   repo: https://github.com/PyCQA/flake8
+    rev: 7.0.0
+    hooks:
+    -   id: flake8
+        name: flake8
+        types: [python]
+        files: invoice_parser
+-   repo: local
+    hooks:
+    -   id: pytest
+        name: tests
+        entry: pytest
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true
