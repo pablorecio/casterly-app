@@ -1,4 +1,3 @@
-
 def combine_lines(lines: list[str]) -> list[str]:
     """
     Function to join items in a single line, for instance:
@@ -17,8 +16,8 @@ def combine_lines(lines: list[str]) -> list[str]:
     new_lines = []
 
     for line in lines:
-        if '€/kg' in line:
-            new_lines[-1] += f' {line}'
+        if "€/kg" in line:
+            new_lines[-1] += f" {line}"
         else:
             new_lines.append(line)
 
