@@ -13,7 +13,7 @@ def combine_lines(lines: list[str]) -> list[str]:
         1KIWI VERDE 0,644 kg 2,95 €/kg 1,90
     """
 
-    new_lines = []
+    new_lines: list[str] = []
 
     for line in lines:
         if "€/kg" in line:
