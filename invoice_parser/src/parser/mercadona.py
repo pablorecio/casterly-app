@@ -27,7 +27,7 @@ class ReceiptCrawler:
         return Decimal(number_str.replace(",", "."))
 
     @classmethod
-    def __groups_to_dict(cls, groups):
+    def __groups_to_dict(cls, groups: tuple[str, ...]) -> dict[str, Any]:
         total = cls.__to_decimal(groups[3])
 
         item_name_match = weighted_item_regex.match(groups[1])
@@ -67,8 +67,8 @@ class ReceiptCrawler:
         lines = extract_lines_from_pdf(path)
         combined_lines = combine_lines(lines)
 
-        pre_selected_lines: list[str] = list(
+        pre_selected_lines: tuple[str, ...] = tuple(
             filter(None, map(cls.__return_groups_or_none, combined_lines))
         )
 
-        return list(map(cls.__groups_to_dict, pre_selected_lines))
+        return list(map(cls.__groups_to_dict, pre_selected_lines))  # type: ignore
