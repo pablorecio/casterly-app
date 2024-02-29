@@ -2,7 +2,9 @@ from datetime import datetime
 from decimal import Decimal
 
 import pytest
-from src.parser.mercadona import Item, MercadonaReceipt, ReceiptCrawler
+from src.models.item import Item
+from src.models.receipt import Receipt
+from src.parser.mercadona import ReceiptCrawler
 
 
 @pytest.mark.parametrize(
@@ -175,5 +177,5 @@ from src.parser.mercadona import Item, MercadonaReceipt, ReceiptCrawler
 def test_mercadona_extract(
     path: str, expected_datetime: datetime, expected_items: list[Item]
 ):
-    expected = MercadonaReceipt(datetime=expected_datetime, items=expected_items)
+    expected = Receipt(datetime=expected_datetime, items=expected_items)
     assert ReceiptCrawler.extract_items(path) == expected

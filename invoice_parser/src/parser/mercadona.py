@@ -1,8 +1,9 @@
 import re
-from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 
+from src.models.item import Item
+from src.models.receipt import Receipt
 from src.parser.utils import combine_lines, extract_lines_from_pdf
 
 ITEM_REGEX = r"(\d+)(.*?)(\d+,\d{2})?(?:\s+(\d+,\d{2}))$"
@@ -14,20 +15,6 @@ weighted_item_regex = re.compile(WEIGHTED_ITEM_REGEX)
 # Very dumb, not validating if the date is actually correct
 DATETIME_REGEX = r"^([0-3]\d)\/([0-1]\d)\/(20\d\d)\s([0-2]\d):([0-5]\d).*$"
 datetime_regex = re.compile(DATETIME_REGEX)
-
-
-@dataclass
-class Item:
-    name: str
-    amount: Decimal
-    cost_unit: Decimal
-    cost_total: Decimal
-
-
-@dataclass
-class MercadonaReceipt:
-    datetime: datetime
-    items: list[Item]  # change to Item dataclass
 
 
 class ReceiptCrawler:
@@ -82,7 +69,7 @@ class ReceiptCrawler:
             )
 
     @classmethod
-    def extract_items(cls, path: str) -> MercadonaReceipt:
+    def extract_items(cls, path: str) -> Receipt:
         lines = extract_lines_from_pdf(path)
         combined_lines = combine_lines(lines)
 
@@ -104,4 +91,4 @@ class ReceiptCrawler:
 
         items = list(map(cls.__groups_to_dict, pre_selected_lines))  # type: ignore
 
-        return MercadonaReceipt(datetime=extracted_date, items=items)
+        return Receipt(datetime=extracted_date, items=items)
