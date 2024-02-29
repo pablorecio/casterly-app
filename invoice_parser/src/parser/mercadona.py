@@ -2,7 +2,6 @@ import re
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Any
 
 from src.parser.utils import combine_lines, extract_lines_from_pdf
 
@@ -18,9 +17,17 @@ datetime_regex = re.compile(DATETIME_REGEX)
 
 
 @dataclass
+class Item:
+    name: str
+    amount: Decimal
+    cost_unit: Decimal
+    cost_total: Decimal
+
+
+@dataclass
 class MercadonaReceipt:
     datetime: datetime
-    items: list[dict[str, Any]]  # change to Item dataclass
+    items: list[Item]  # change to Item dataclass
 
 
 class ReceiptCrawler:
@@ -39,17 +46,17 @@ class ReceiptCrawler:
         return Decimal(number_str.replace(",", "."))
 
     @classmethod
-    def __groups_to_dict(cls, groups: tuple[str, ...]) -> dict[str, Any]:
+    def __groups_to_dict(cls, groups: tuple[str, ...]) -> Item:
         total = cls.__to_decimal(groups[3])
 
         item_name_match = weighted_item_regex.match(groups[1])
         if item_name_match:
-            return {
-                "amount": cls.__to_decimal(item_name_match.group(2)),
-                "name": item_name_match.group(1),
-                "cost_unit": cls.__to_decimal(item_name_match.group(3)),
-                "cost_total": total,
-            }
+            return Item(
+                amount=cls.__to_decimal(item_name_match.group(2)),
+                name=item_name_match.group(1),
+                cost_unit=cls.__to_decimal(item_name_match.group(3)),
+                cost_total=total,
+            )
         else:
             amount = groups[0]
             name = groups[1]
@@ -67,12 +74,12 @@ class ReceiptCrawler:
                 amount = groups[0][:units_len]
                 name = f"{overflow}{name}"
 
-            return {
-                "amount": int(amount),
-                "name": name.strip(),
-                "cost_unit": cost_unit,
-                "cost_total": total,
-            }
+            return Item(
+                amount=Decimal(int(amount)),
+                name=name.strip(),
+                cost_unit=cost_unit,
+                cost_total=total,
+            )
 
     @classmethod
     def extract_items(cls, path: str) -> MercadonaReceipt:
