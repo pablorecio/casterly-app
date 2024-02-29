@@ -1,15 +1,17 @@
+from datetime import datetime
 from decimal import Decimal
 from typing import Any
 
 import pytest
-from src.parser.mercadona import ReceiptCrawler
+from src.parser.mercadona import MercadonaReceipt, ReceiptCrawler
 
 
 @pytest.mark.parametrize(
-    ("path", "expected"),
+    ("path", "expected_datetime", "expected_items"),
     [
         (
             "invoice_parser/tests/parser/data/mercadona_01.pdf",
+            datetime(2024, 2, 19, 19, 19),
             [
                 {
                     "amount": 1,
@@ -39,6 +41,7 @@ from src.parser.mercadona import ReceiptCrawler
         ),
         (
             "invoice_parser/tests/parser/data/mercadona_02.pdf",
+            datetime(2024, 2, 5, 18, 28),
             [
                 {
                     "amount": 1,
@@ -170,5 +173,8 @@ from src.parser.mercadona import ReceiptCrawler
         ),
     ],
 )
-def test_mercadona_extract(path: str, expected: list[dict[str, Any]]):
+def test_mercadona_extract(
+    path: str, expected_datetime: datetime, expected_items: list[dict[str, Any]]
+):
+    expected = MercadonaReceipt(datetime=expected_datetime, items=expected_items)
     assert ReceiptCrawler.extract_items(path) == expected
