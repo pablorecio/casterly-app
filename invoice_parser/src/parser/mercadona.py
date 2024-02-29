@@ -47,7 +47,7 @@ class ReceiptCrawler:
             #   16 HUEVOS CAMPEROS
             # to turn into
             #   6 HUEVOS CAMPEROS
-            units_len = len((total / cost_unit).to_eng_string())
+            units_len = len((total / cost_unit).to_eng_string()) if total > 0 else 1
 
             overflow = groups[0][units_len:]
 
