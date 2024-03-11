@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 from typing import Any
 
 from pydantic import BaseModel, model_serializer
@@ -10,8 +11,8 @@ class Receipt(BaseModel):
     items: list[Item]
 
     @property
-    def total_amount(self):
-        return sum([i.cost_total for i in self.items])
+    def total_amount(self) -> Decimal:
+        return Decimal(sum([i.cost_total for i in self.items]))
 
     @model_serializer()
     def serialize_model(self) -> dict[str, Any]:

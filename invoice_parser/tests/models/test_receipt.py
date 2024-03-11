@@ -56,7 +56,7 @@ def test_total_amount(items: list[Item], expected: Decimal):
             {
                 "datetime": datetime(2023, 12, 21).strftime("%Y-%m-%dT%H:%M:%S"),
                 "items": [],
-                "total_amount": Decimal(0),
+                "total_amount": "0",
             },
         ),
         (
