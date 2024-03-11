@@ -119,6 +119,88 @@ def test_total_amount(items: list[Item], expected: Decimal):
         ),
     ],
 )
+def test_output_to_file(
+    tmp_path, items: list[Item], dt: datetime, expected: dict[str, Any]
+):
+    receipt = Receipt(datetime=dt, items=items)
+    path = tmp_path / "test_output.json"
+    receipt.output_to_file(str(path))
+
+    assert path.read_text() == json.dumps(expected, separators=(",", ":"))
+
+
+@pytest.mark.parametrize(
+    ("items", "dt", "expected"),
+    [
+        (
+            [],
+            datetime(2023, 12, 21),
+            {
+                "datetime": datetime(2023, 12, 21).strftime("%Y-%m-%dT%H:%M:%S"),
+                "items": [],
+                "total_amount": "0",
+            },
+        ),
+        (
+            [
+                Item(
+                    name="LECHE",
+                    amount=Decimal(1),
+                    cost_unit=Decimal("1.56"),
+                    cost_total=Decimal("1.56"),
+                ),
+            ],
+            datetime(2023, 12, 21),
+            {
+                "datetime": datetime(2023, 12, 21).strftime("%Y-%m-%dT%H:%M:%S"),
+                "items": [
+                    {
+                        "name": "LECHE",
+                        "amount": "1",
+                        "cost_unit": "1.56",
+                        "cost_total": "1.56",
+                    }
+                ],
+                "total_amount": "1.56",
+            },
+        ),
+        (
+            [
+                Item(
+                    name="LECHE",
+                    amount=Decimal(1),
+                    cost_unit=Decimal("1.56"),
+                    cost_total=Decimal("1.56"),
+                ),
+                Item(
+                    name="TORTITAS MAIZ",
+                    amount=Decimal(2),
+                    cost_unit=Decimal("1.99"),
+                    cost_total=Decimal("3.98"),
+                ),
+            ],
+            datetime(2023, 12, 21),
+            {
+                "datetime": datetime(2023, 12, 21).strftime("%Y-%m-%dT%H:%M:%S"),
+                "items": [
+                    {
+                        "name": "LECHE",
+                        "amount": "1",
+                        "cost_unit": "1.56",
+                        "cost_total": "1.56",
+                    },
+                    {
+                        "name": "TORTITAS MAIZ",
+                        "amount": "2",
+                        "cost_unit": "1.99",
+                        "cost_total": "3.98",
+                    },
+                ],
+                "total_amount": "5.54",
+            },
+        ),
+    ],
+)
 def test_model_serializer(items: list[Item], dt: datetime, expected: dict[str, Any]):
     receipt = Receipt(datetime=dt, items=items)
     assert json.loads(receipt.model_dump_json()) == expected

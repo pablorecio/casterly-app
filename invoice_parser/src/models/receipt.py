@@ -14,6 +14,11 @@ class Receipt(BaseModel):
     def total_amount(self) -> Decimal:
         return Decimal(sum([i.cost_total for i in self.items]))
 
+    def output_to_file(self, path: str) -> None:
+        output = self.model_dump_json()
+        f = open(path, "w")
+        f.write(output)
+
     @model_serializer()
     def serialize_model(self) -> dict[str, Any]:
         return {
