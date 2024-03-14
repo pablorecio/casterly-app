@@ -15,3 +15,29 @@ pipeline that will receive the email with the receipt and landing the data into 
 
 Lastly, we will want to serve this information via an API and/or present it in a consumable
 way for the users.
+
+<!-- BEGIN_TF_DOCS -->
+## Requirements
+
+No requirements.
+
+## Providers
+
+No providers.
+
+## Modules
+
+No modules.
+
+## Resources
+
+No resources.
+
+## Inputs
+
+No inputs.
+
+## Outputs
+
+No outputs.
+<!-- END_TF_DOCS -->

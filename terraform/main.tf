@@ -67,6 +67,7 @@ resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_iam_role" {
   policy_arn = aws_iam_policy.iam_policy_for_lambda.arn
 }
 
+# tflint-ignore: terraform_required_providers, terraform_unused_declarations
 data "archive_file" "zip_the_python_code" {
   type        = "zip"
   source_dir  = "${path.module}/../invoice_parser/src/"
