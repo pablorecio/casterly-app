@@ -21,6 +21,46 @@ resource "aws_s3_bucket" "user_receipts" {
   }
 }
 
+resource "aws_s3_bucket_versioning" "versioning_user_receipts" {
+  bucket = aws_s3_bucket.user_receipts.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "user_receipts_encryption" {
+  bucket = aws_s3_bucket.user_receipts.bucket
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket" "lambda_deployments" {
+  bucket = "casterly-lambda-deployments"
+
+  tags = {
+    Name = "Lambda Deployments"
+  }
+}
+
+resource "aws_s3_bucket_versioning" "versioning_lambda_deployments" {
+  bucket = aws_s3_bucket.lambda_deployments.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "lambda_deployments_encryption" {
+  bucket = aws_s3_bucket.user_receipts.bucket
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
 data "aws_iam_policy_document" "assume_role" {
   statement {
     effect = "Allow"
