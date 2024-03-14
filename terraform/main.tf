@@ -21,23 +21,22 @@ resource "aws_s3_bucket" "user_receipts" {
   }
 }
 
-resource "aws_iam_role" "lambda_role" {
-  name               = "Spacelift_Test_Lambda_Function_Role"
-  assume_role_policy = <<EOF
-{
- "Version": "2012-10-17",
- "Statement": [
-   {
-     "Action": "sts:AssumeRole",
-     "Principal": {
-       "Service": "lambda.amazonaws.com"
-     },
-     "Effect": "Allow",
-     "Sid": ""
-   }
- ]
+data "aws_iam_policy_document" "assume_role" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
 }
-EOF
+
+resource "aws_iam_role" "iam_for_lambda" {
+  name               = "iam_for_lambda"
+  assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
 resource "aws_iam_policy" "iam_policy_for_lambda" {
@@ -64,7 +63,7 @@ EOF
 }
 
 resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_iam_role" {
-  role       = aws_iam_role.lambda_role.name
+  role       = aws_iam_role.iam_for_lambda.name
   policy_arn = aws_iam_policy.iam_policy_for_lambda.arn
 }
 
@@ -76,9 +75,29 @@ data "archive_file" "zip_the_python_code" {
 
 resource "aws_lambda_function" "terraform_lambda_func" {
   filename      = "${path.module}/../invoice_parser/src/invoice-parser.zip"
-  function_name = "Invoice_Parser_Lambda_Function"
-  role          = aws_iam_role.lambda_role.arn
+  function_name = "InvoiceParser"
+  role          = aws_iam_role.iam_for_lambda.arn
   handler       = "lambda.lambda_handler"
   runtime       = "python3.12"
   depends_on    = [aws_iam_role_policy_attachment.attach_iam_policy_to_iam_role]
+}
+
+resource "aws_lambda_permission" "allow_bucket" {
+  statement_id  = "AllowExecutionFromS3Bucket"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.terraform_lambda_func.arn
+  principal     = "s3.amazonaws.com"
+  source_arn    = aws_s3_bucket.user_receipts.arn
+}
+
+resource "aws_s3_bucket_notification" "bucket_notification" {
+  bucket = aws_s3_bucket.user_receipts.id
+
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.terraform_lambda_func.arn
+    events              = ["s3:ObjectCreated:*"]
+    filter_suffix       = ".pdf"
+  }
+
+  depends_on = [aws_lambda_permission.allow_bucket]
 }

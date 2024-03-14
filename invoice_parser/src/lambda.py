@@ -1,3 +1,4 @@
 def lambda_handler(event, context):
-    message = "Hello {} !".format(event["key1"])
-    return {"message": message}
+    print(f"event: {event}")
+    print(f"context: {context}")
+    return {}
