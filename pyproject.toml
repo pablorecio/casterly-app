@@ -1,0 +1,14 @@
+[project]
+name = "receiptparser"
+description = "Parses receipt from spanish supermarkets"
+requires-python = "~=3.12"
+version = "0.0.1"
+
+[tool.pytest.ini_options]
+pythonpath = ["invoice_parser"]
+
+[tool.mypy]
+ignore_missing_imports = true
+
+[tool.black]
+include = '\.pyi?$'
