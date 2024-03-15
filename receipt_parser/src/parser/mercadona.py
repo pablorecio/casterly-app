@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from src.models.item import Item
 from src.models.receipt import Receipt
-from src.parser.utils import combine_lines, extract_lines_from_pdf
+from src.parser.utils import extract_lines_from_pdf
 
 ITEM_REGEX = r"(\d+)(.*?)(\d+,\d{2})?(?:\s+(\d+,\d{2}))$"
 item_regex = re.compile(ITEM_REGEX)
@@ -69,9 +69,35 @@ class ReceiptCrawler:
             )
 
     @classmethod
+    def __combine_lines(cls, lines: list[str]) -> list[str]:
+        """
+        Function to join items in a single line, for instance:
+
+            1PLATANO
+            0,838 kg 1,99 €/kg 1,67
+            1KIWI VERDE
+            0,644 kg 2,95 €/kg 1,90
+
+        Should turn into
+
+            1PLATANO 0,838 kg 1,99 €/kg 1,67
+            1KIWI VERDE 0,644 kg 2,95 €/kg 1,90
+        """
+
+        new_lines: list[str] = []
+
+        for line in lines:
+            if "€/kg" in line:
+                new_lines[-1] += f" {line}"
+            else:
+                new_lines.append(line)
+
+        return new_lines
+
+    @classmethod
     def extract_items(cls, path: str) -> Receipt:
         lines = extract_lines_from_pdf(path)
-        combined_lines = combine_lines(lines)
+        combined_lines = cls.__combine_lines(lines)
 
         pre_selected_lines: tuple[str, ...] = tuple(
             filter(None, map(cls.__return_groups_or_none, combined_lines))
