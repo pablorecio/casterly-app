@@ -11,7 +11,7 @@ from src.parser.mercadona import ReceiptCrawler
     ("path", "expected_datetime", "expected_items"),
     [
         (
-            "invoice_parser/tests/parser/data/mercadona_01.pdf",
+            "receipt_parser/tests/parser/data/mercadona_01.pdf",
             datetime(2024, 2, 19, 19, 19),
             [
                 Item(
@@ -41,7 +41,7 @@ from src.parser.mercadona import ReceiptCrawler
             ],
         ),
         (
-            "invoice_parser/tests/parser/data/mercadona_02.pdf",
+            "receipt_parser/tests/parser/data/mercadona_02.pdf",
             datetime(2024, 2, 5, 18, 28),
             [
                 Item(
