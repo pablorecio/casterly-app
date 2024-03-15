@@ -1,0 +1,24 @@
+name: Build and upload Lambda Functions
+run-name: '${{ github.workflow }}'
+
+on:
+  push:
+      branches:
+        - main
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@master
+      - name: Builds lambda function
+        run: make build_lambda
+      - name: Uploads to S3
+        uses: shallwefootball/s3-upload-action@master
+        with:
+          aws_key_id: ${{ secrets.AWS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
+          aws_bucket: ${{ secrets.AWS_BUCKET }}
+          source_dir: 'build.zip'
+          destination_dir: 'lambda_functions/'
