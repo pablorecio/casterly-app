@@ -12,6 +12,10 @@ jobs:
     steps:
       - name: Check out repo
         uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
       - name: Builds lambda function
         run: make build_lambda
       - name: Setup AWS CLI
