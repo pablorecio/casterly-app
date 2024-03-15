@@ -114,6 +114,7 @@ class ReceiptCrawler:
                     int(groups[3]),
                     int(groups[4]),
                 )
+                break
 
         items = list(map(cls.__groups_to_dict, pre_selected_lines))  # type: ignore
 

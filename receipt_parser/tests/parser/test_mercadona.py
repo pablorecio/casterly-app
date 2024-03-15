@@ -8,7 +8,7 @@ from src.parser.mercadona import ReceiptCrawler
 
 
 @pytest.mark.parametrize(
-    ("path", "expected_datetime", "expected_items"),
+    ("path", "expected_datetime", "expected_items", "total_amount"),
     [
         (
             "receipt_parser/tests/parser/data/mercadona_01.pdf",
@@ -39,6 +39,7 @@ from src.parser.mercadona import ReceiptCrawler
                     cost_total=Decimal("0.10"),
                 ),
             ],
+            Decimal("5.40"),
         ),
         (
             "receipt_parser/tests/parser/data/mercadona_02.pdf",
@@ -171,11 +172,17 @@ from src.parser.mercadona import ReceiptCrawler
                     cost_total=Decimal("1.90"),
                 ),
             ],
+            Decimal("38.23"),
         ),
     ],
 )
 def test_mercadona_extract(
-    path: str, expected_datetime: datetime, expected_items: list[Item]
+    path: str,
+    expected_datetime: datetime,
+    expected_items: list[Item],
+    total_amount: Decimal,
 ):
+    result = ReceiptCrawler.extract_items(path)
     expected = Receipt(datetime=expected_datetime, items=expected_items)
-    assert ReceiptCrawler.extract_items(path) == expected
+    assert result == expected
+    assert result.total_amount == total_amount
