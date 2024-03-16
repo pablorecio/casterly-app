@@ -19,7 +19,7 @@ def lambda_handler(event, context):
         print("Carrefour receipt")
         crawler_class = CarrefourRC
 
-    with tempfile.TemporaryFile(mode="w+b") as f:
+    with tempfile.NamedTemporaryFile(mode="w+b") as f:
         s3_client.download_fileobj(s3_bucket_name, s3_file_name, f)
 
         print(f.name)
