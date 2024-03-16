@@ -2,7 +2,7 @@ import re
 from decimal import Decimal
 
 from src.models.item import Item
-from src.parser.base_parser import BaseReceiptCrawler
+from src.parser.base_parser import BaseReceiptParser
 
 ITEM_REGEX = r"([\w\d][\w\d\s{1}]+?)\s{2,}(.*\s(-?\d+,\d{0,2}))"
 item_regex = re.compile(ITEM_REGEX)
@@ -11,7 +11,7 @@ MULTIPLE_ITEM_REGEX = r"^\s*(\d+)\sx\s\(\s+(\d+,\d{0,2})\s+\)"
 multiple_item_regex = re.compile(MULTIPLE_ITEM_REGEX)
 
 
-class CarrefourReceiptCrawler(BaseReceiptCrawler):
+class CarrefourReceiptParser(BaseReceiptParser):
     DATETIME_REGEX = r"([0-3]\d)\/([0-1]\d)\/(20\d\d)\s([0-2]\d):([0-5]\d):([0-5]\d)"
     DATETIME_FORMAT = "%d/%m/%Y %H:%M:%S"
     STORE_NAME = "carrefour"

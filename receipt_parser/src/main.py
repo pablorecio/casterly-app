@@ -4,8 +4,8 @@ import tempfile
 
 import boto3
 from botocore.exceptions import ClientError
-from src.parser.carrefour import CarrefourReceiptCrawler
-from src.parser.mercadona import MercadonaReceiptCrawler
+from src.parser.carrefour import CarrefourReceiptParser
+from src.parser.mercadona import MercadonaReceiptParser
 
 logger = logging.getLogger()
 logger.setLevel("INFO")
@@ -16,13 +16,13 @@ def lambda_handler(event, context):
     s3_bucket_name = event["Records"][0]["s3"]["bucket"]["name"]
     s3_file_name = event["Records"][0]["s3"]["object"]["key"]
 
-    crawler_class = object
+    parser_class = object
     if s3_file_name.startswith("mercadona"):
         logger.info("Mercadona receipt")
-        crawler_class = MercadonaReceiptCrawler
+        parser_class = MercadonaReceiptParser
     elif s3_file_name.startswith("carrefour"):
         logger.info("Carrefour receipt")
-        crawler_class = CarrefourReceiptCrawler
+        parser_class = CarrefourReceiptParser
 
     with tempfile.NamedTemporaryFile(mode="w+b") as f:
         file_path = f"s3://{s3_bucket_name}/{s3_file_name}"
@@ -34,7 +34,7 @@ def lambda_handler(event, context):
             logger.error("Failed to download file %s", file_path)
             raise
 
-        receipt = crawler_class.extract_items(f.name)
+        receipt = parser_class(f.name).get_receipt_model()
         logger.info(receipt.model_dump_json())
 
     return json.loads(receipt.model_dump_json())

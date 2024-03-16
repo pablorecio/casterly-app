@@ -2,7 +2,7 @@ import re
 from decimal import Decimal
 
 from src.models.item import Item
-from src.parser.base_parser import BaseReceiptCrawler
+from src.parser.base_parser import BaseReceiptParser
 from src.parser.utils import to_decimal
 
 ITEM_REGEX = r"(\d+)(.*?)(\d+,\d{2})?(?:\s+(\d+,\d{2}))$"
@@ -12,7 +12,7 @@ WEIGHTED_ITEM_REGEX = r"(.*)\s(\d,\d{3})\skg\s(\d,\d{2})\s€/kg$"
 weighted_item_regex = re.compile(WEIGHTED_ITEM_REGEX)
 
 
-class MercadonaReceiptCrawler(BaseReceiptCrawler):
+class MercadonaReceiptParser(BaseReceiptParser):
     DATETIME_REGEX = r"([0-3]\d)\/([0-1]\d)\/(20\d\d)\s([0-2]\d):([0-5]\d)"
     DATETIME_FORMAT = "%d/%m/%Y %H:%M"
     STORE_NAME = "mercadona"

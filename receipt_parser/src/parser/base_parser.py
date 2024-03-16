@@ -10,7 +10,7 @@ logger = logging.getLogger()
 logger.setLevel("INFO")
 
 
-class BaseReceiptCrawler:
+class BaseReceiptParser:
     DATETIME_REGEX: str
     DATETIME_FORMAT: str
     STORE_NAME: str

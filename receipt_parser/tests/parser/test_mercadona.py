@@ -4,7 +4,7 @@ from decimal import Decimal
 import pytest
 from src.models.item import Item
 from src.models.receipt import Receipt
-from src.parser.mercadona import MercadonaReceiptCrawler
+from src.parser.mercadona import MercadonaReceiptParser
 
 
 @pytest.mark.parametrize(
@@ -182,8 +182,8 @@ def test_mercadona_extract(
     expected_items: list[Item],
     total_amount: Decimal,
 ):
-    crawler = MercadonaReceiptCrawler(path)
-    result = crawler.get_receipt_model()
+    parser = MercadonaReceiptParser(path)
+    result = parser.get_receipt_model()
     expected = Receipt(
         datetime=expected_datetime, items=expected_items, store="mercadona"
     )
