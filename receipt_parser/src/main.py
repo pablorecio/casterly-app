@@ -3,6 +3,7 @@ import logging
 import tempfile
 
 import boto3
+from botocore.exceptions import ClientError
 from src.parser.carrefour import ReceiptCrawler as CarrefourRC
 from src.parser.mercadona import ReceiptCrawler as MercadonaRC
 
@@ -24,7 +25,14 @@ def lambda_handler(event, context):
         crawler_class = CarrefourRC
 
     with tempfile.NamedTemporaryFile(mode="w+b") as f:
-        s3_client.download_fileobj(s3_bucket_name, s3_file_name, f)
+        file_path = f"s3://{s3_bucket_name}/{s3_file_name}"
+        logger.info("Downloading file %s", file_path)
+
+        try:
+            s3_client.download_fileobj(s3_bucket_name, s3_file_name, f)
+        except ClientError:
+            logger.error("Failed to download file %s", file_path)
+            raise
 
         receipt = crawler_class.extract_items(f.name)
         logger.info(receipt.model_dump_json())
