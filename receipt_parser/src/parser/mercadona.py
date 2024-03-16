@@ -1,10 +1,9 @@
 import re
-from datetime import datetime
 from decimal import Decimal
 
 from src.models.item import Item
-from src.models.receipt import Receipt
-from src.parser.utils import extract_lines_from_pdf, to_decimal
+from src.parser.base_parser import BaseReceiptCrawler
+from src.parser.utils import to_decimal
 
 ITEM_REGEX = r"(\d+)(.*?)(\d+,\d{2})?(?:\s+(\d+,\d{2}))$"
 item_regex = re.compile(ITEM_REGEX)
@@ -12,14 +11,38 @@ item_regex = re.compile(ITEM_REGEX)
 WEIGHTED_ITEM_REGEX = r"(.*)\s(\d,\d{3})\skg\s(\d,\d{2})\s€/kg$"
 weighted_item_regex = re.compile(WEIGHTED_ITEM_REGEX)
 
-# Very dumb, not validating if the date is actually correct
-DATETIME_REGEX = r"^([0-3]\d)\/([0-1]\d)\/(20\d\d)\s([0-2]\d):([0-5]\d).*$"
-datetime_regex = re.compile(DATETIME_REGEX)
 
+class MercadonaReceiptCrawler(BaseReceiptCrawler):
+    DATETIME_REGEX = r"([0-3]\d)\/([0-1]\d)\/(20\d\d)\s([0-2]\d):([0-5]\d)"
+    DATETIME_FORMAT = "%d/%m/%Y %H:%M"
+    STORE_NAME = "mercadona"
 
-class ReceiptCrawler:
-    @classmethod
-    def __return_groups_or_none(cls, line: str):
+    def __combine_lines(cls, lines: list[str]) -> list[str]:
+        """
+        Function to join items in a single line, for instance:
+
+            1PLATANO
+            0,838 kg 1,99 €/kg 1,67
+            1KIWI VERDE
+            0,644 kg 2,95 €/kg 1,90
+
+        Should turn into
+
+            1PLATANO 0,838 kg 1,99 €/kg 1,67
+            1KIWI VERDE 0,644 kg 2,95 €/kg 1,90
+        """
+
+        new_lines: list[str] = []
+
+        for line in lines:
+            if "€/kg" in line:
+                new_lines[-1] += f" {line}"
+            else:
+                new_lines.append(line)
+
+        return new_lines
+
+    def __return_groups_or_none(self, line: str):
         match = item_regex.match(line)
         if match:
             groups = match.groups()
@@ -28,8 +51,7 @@ class ReceiptCrawler:
         else:
             return False
 
-    @classmethod
-    def __groups_to_dict(cls, groups: tuple[str, ...]) -> Item:
+    def __groups_to_dict(self, groups: tuple[str, ...]) -> Item:
         total = to_decimal(groups[3])
 
         item_name_match = weighted_item_regex.match(groups[1])
@@ -64,58 +86,14 @@ class ReceiptCrawler:
                 cost_total=total,
             )
 
-    @classmethod
-    def __combine_lines(cls, lines: list[str]) -> list[str]:
-        """
-        Function to join items in a single line, for instance:
+    # Implementing parent class methods
+    def _reduce_lines(self, lines: list[str] | None = None) -> list[str]:
+        if lines is None:
+            lines = self.lines
 
-            1PLATANO
-            0,838 kg 1,99 €/kg 1,67
-            1KIWI VERDE
-            0,644 kg 2,95 €/kg 1,90
-
-        Should turn into
-
-            1PLATANO 0,838 kg 1,99 €/kg 1,67
-            1KIWI VERDE 0,644 kg 2,95 €/kg 1,90
-        """
-
-        new_lines: list[str] = []
-
-        for line in lines:
-            if "€/kg" in line:
-                new_lines[-1] += f" {line}"
-            else:
-                new_lines.append(line)
-
-        return new_lines
-
-    @classmethod
-    def extract_items(cls, path: str) -> Receipt:
-        lines = extract_lines_from_pdf(path)
-        combined_lines = cls.__combine_lines(lines)
-
-        pre_selected_lines: tuple[str, ...] = tuple(
-            filter(None, map(cls.__return_groups_or_none, combined_lines))
+        return list(
+            filter(None, map(self.__return_groups_or_none, self.__combine_lines(lines)))
         )
 
-        for line in combined_lines:
-            match = datetime_regex.match(line)
-            if match:
-                groups = match.groups()
-                extracted_date = datetime(
-                    int(groups[2]),
-                    int(groups[1]),
-                    int(groups[0]),
-                    int(groups[3]),
-                    int(groups[4]),
-                )
-                break
-
-        items = list(map(cls.__groups_to_dict, pre_selected_lines))  # type: ignore
-
-        return Receipt(datetime=extracted_date, items=items, store="mercadona")
-
-
-class MercadonaReceiptCrawler(ReceiptCrawler):
-    pass
+    def _get_items_from_lines(self, lines: list[str]) -> list[Item]:
+        return list(map(self.__groups_to_dict, lines))  # type: ignore

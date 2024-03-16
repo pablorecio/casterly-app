@@ -4,7 +4,7 @@ from decimal import Decimal
 import pytest
 from src.models.item import Item
 from src.models.receipt import Receipt
-from src.parser.carrefour import ReceiptCrawler
+from src.parser.carrefour import CarrefourReceiptCrawler
 
 
 @pytest.mark.parametrize(
@@ -356,7 +356,8 @@ def test_carrefour_extract(
     expected_items: list[Item],
     total_amount: Decimal,
 ):
-    result = ReceiptCrawler.extract_items(path)
+    receipt = CarrefourReceiptCrawler(path)
+    result = receipt.get_receipt_model()
     expected = Receipt(
         datetime=expected_datetime, items=expected_items, store="carrefour"
     )

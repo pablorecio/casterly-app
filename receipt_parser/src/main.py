@@ -4,8 +4,8 @@ import tempfile
 
 import boto3
 from botocore.exceptions import ClientError
-from src.parser.carrefour import ReceiptCrawler as CarrefourRC
-from src.parser.mercadona import ReceiptCrawler as MercadonaRC
+from src.parser.carrefour import CarrefourReceiptCrawler
+from src.parser.mercadona import MercadonaReceiptCrawler
 
 logger = logging.getLogger()
 logger.setLevel("INFO")
@@ -19,10 +19,10 @@ def lambda_handler(event, context):
     crawler_class = object
     if s3_file_name.startswith("mercadona"):
         logger.info("Mercadona receipt")
-        crawler_class = MercadonaRC
+        crawler_class = MercadonaReceiptCrawler
     elif s3_file_name.startswith("carrefour"):
         logger.info("Carrefour receipt")
-        crawler_class = CarrefourRC
+        crawler_class = CarrefourReceiptCrawler
 
     with tempfile.NamedTemporaryFile(mode="w+b") as f:
         file_path = f"s3://{s3_bucket_name}/{s3_file_name}"
