@@ -61,4 +61,4 @@ class ReceiptCrawler:
                 )
                 break
 
-        return Receipt(datetime=extracted_date, items=items)
+        return Receipt(datetime=extracted_date, items=items, store="carrefour")

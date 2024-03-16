@@ -56,6 +56,7 @@ def test_total_amount(items: list[Item], expected: Decimal):
             {
                 "datetime": datetime(2023, 12, 21).strftime("%Y-%m-%dT%H:%M:%S"),
                 "items": [],
+                "store": None,
                 "total_amount": "0",
             },
         ),
@@ -79,6 +80,7 @@ def test_total_amount(items: list[Item], expected: Decimal):
                         "cost_total": "1.56",
                     }
                 ],
+                "store": None,
                 "total_amount": "1.56",
             },
         ),
@@ -114,6 +116,7 @@ def test_total_amount(items: list[Item], expected: Decimal):
                         "cost_total": "3.98",
                     },
                 ],
+                "store": None,
                 "total_amount": "5.54",
             },
         ),
@@ -139,6 +142,7 @@ def test_output_to_file(
                 "datetime": datetime(2023, 12, 21).strftime("%Y-%m-%dT%H:%M:%S"),
                 "items": [],
                 "total_amount": "0",
+                "store": None,
             },
         ),
         (
@@ -162,6 +166,7 @@ def test_output_to_file(
                     }
                 ],
                 "total_amount": "1.56",
+                "store": None,
             },
         ),
         (
@@ -197,6 +202,7 @@ def test_output_to_file(
                     },
                 ],
                 "total_amount": "5.54",
+                "store": None,
             },
         ),
     ],

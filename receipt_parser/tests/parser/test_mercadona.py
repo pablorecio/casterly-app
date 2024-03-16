@@ -183,6 +183,8 @@ def test_mercadona_extract(
     total_amount: Decimal,
 ):
     result = ReceiptCrawler.extract_items(path)
-    expected = Receipt(datetime=expected_datetime, items=expected_items)
+    expected = Receipt(
+        datetime=expected_datetime, items=expected_items, store="mercadona"
+    )
     assert result == expected
     assert result.total_amount == total_amount

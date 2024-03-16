@@ -118,4 +118,4 @@ class ReceiptCrawler:
 
         items = list(map(cls.__groups_to_dict, pre_selected_lines))  # type: ignore
 
-        return Receipt(datetime=extracted_date, items=items)
+        return Receipt(datetime=extracted_date, items=items, store="mercadona")

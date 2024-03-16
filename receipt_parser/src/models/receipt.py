@@ -9,6 +9,7 @@ from src.models.item import Item
 class Receipt(BaseModel):
     datetime: datetime
     items: list[Item]
+    store: str | None = None
 
     @property
     def total_amount(self) -> Decimal:
@@ -24,5 +25,6 @@ class Receipt(BaseModel):
         return {
             "datetime": self.datetime,
             "items": self.items,
+            "store": self.store,
             "total_amount": self.total_amount,
         }
