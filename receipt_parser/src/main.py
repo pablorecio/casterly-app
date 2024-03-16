@@ -1,5 +1,8 @@
+import boto3
 from src.parser.carrefour import ReceiptCrawler as CarrefourRC
 from src.parser.mercadona import ReceiptCrawler as MercadonaRC
+
+s3_client = boto3.client("s3")
 
 
 def lambda_handler(event, context):
@@ -12,7 +15,9 @@ def lambda_handler(event, context):
     elif s3_file_name.startswith("carrefour"):
         crawler_class = CarrefourRC
 
-    s3_path = f"s3://{s3_bucket_name}/{s3_file_name}"
-    print(crawler_class.extract_items(s3_path).model_dump_json())
+    obj = s3_client.get_object(Bucket=s3_bucket_name, Key=s3_file_name)
+    body = obj["Body"]
+
+    print(crawler_class.extract_items(body).model_dump_json())
 
     return {}
