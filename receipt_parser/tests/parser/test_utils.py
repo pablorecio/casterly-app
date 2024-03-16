@@ -1,5 +1,7 @@
+from decimal import Decimal
+
 import pytest
-from src.parser.utils import extract_lines_from_pdf
+from src.parser.utils import extract_lines_from_pdf, to_decimal
 
 
 @pytest.mark.parametrize(
@@ -87,3 +89,16 @@ def test_extract_lines_from_pdf(path, lines):
     result = extract_lines_from_pdf(path)
 
     assert result == lines
+
+
+@pytest.mark.parametrize(
+    ["input", "comma_separator", "expected"],
+    [
+        ("1", None, Decimal(1)),
+        ("1.6", None, Decimal("1.6")),
+        ("1,6", ",", Decimal("1.6")),
+        ("652,66", ",", Decimal("652.66")),
+    ],
+)
+def test_to_decimal(input, comma_separator, expected):
+    assert to_decimal(input, comma_separator) == expected

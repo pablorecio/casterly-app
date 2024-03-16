@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from src.models.item import Item
 from src.models.receipt import Receipt
-from src.parser.utils import extract_lines_from_pdf
+from src.parser.utils import extract_lines_from_pdf, to_decimal
 
 ITEM_REGEX = r"(\d+)(.*?)(\d+,\d{2})?(?:\s+(\d+,\d{2}))$"
 item_regex = re.compile(ITEM_REGEX)
@@ -29,25 +29,21 @@ class ReceiptCrawler:
             return False
 
     @classmethod
-    def __to_decimal(cls, number_str: str) -> Decimal:
-        return Decimal(number_str.replace(",", "."))
-
-    @classmethod
     def __groups_to_dict(cls, groups: tuple[str, ...]) -> Item:
-        total = cls.__to_decimal(groups[3])
+        total = to_decimal(groups[3])
 
         item_name_match = weighted_item_regex.match(groups[1])
         if item_name_match:
             return Item(
-                amount=cls.__to_decimal(item_name_match.group(2)),
+                amount=to_decimal(item_name_match.group(2)),
                 name=item_name_match.group(1),
-                cost_unit=cls.__to_decimal(item_name_match.group(3)),
+                cost_unit=to_decimal(item_name_match.group(3)),
                 cost_total=total,
             )
         else:
             amount = groups[0]
             name = groups[1]
-            cost_unit = cls.__to_decimal(groups[2]) if groups[2] else total
+            cost_unit = to_decimal(groups[2]) if groups[2] else total
 
             # Need to handle the case
             #   16 HUEVOS CAMPEROS
@@ -119,3 +115,7 @@ class ReceiptCrawler:
         items = list(map(cls.__groups_to_dict, pre_selected_lines))  # type: ignore
 
         return Receipt(datetime=extracted_date, items=items, store="mercadona")
+
+
+class MercadonaReceiptCrawler(ReceiptCrawler):
+    pass
