@@ -10,7 +10,7 @@ logger = logging.getLogger()
 logger.setLevel("INFO")
 s3_client = boto3.client("s3")
 
-DL_BUCKET = "casterly-app-live-dl"
+DL_BUCKET = "casterly-app-dl-dev"
 
 
 def lambda_handler(event, context):

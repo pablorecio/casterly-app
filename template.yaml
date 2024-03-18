@@ -1,0 +1,96 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: receipt_parser
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+    MemorySize: 128
+    Runtime: python3.12
+    Tracing: Active
+    # You can add LoggingConfig parameters such as the Logformat, Log Group, and SystemLogLevel or ApplicationLogLevel. Learn more here https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html#sam-function-loggingconfig.
+    LoggingConfig:
+      LogFormat: JSON
+
+Parameters:
+  Env:
+    Type: String
+    AllowedValues:
+      - dev
+      - live
+  CasterlyReceiptLandingBucketName:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: CasterlyReceiptLandingBucketName
+    Description: Raw receipts S3 bucket name without the environment suffix
+  CasterlyDLBucketName:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: CasterlyDLBucketName
+    Description: Raw receipts S3 bucket name without the environment suffix
+  ProjectTag:
+    Type: String
+    Default: casterly
+
+Resources:
+  ReceiptsS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${CasterlyReceiptLandingBucketName}-${Env}
+      VersioningConfiguration:
+        Status: Enabled
+      NotificationConfiguration:
+        EventBridgeConfiguration:
+          EventBridgeEnabled: true
+      Tags:
+        - Key: project
+          Value: !Ref ProjectTag
+
+  DLS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${CasterlyDLBucketName}-${Env}
+      VersioningConfiguration:
+        Status: Enabled
+      Tags:
+        - Key: project
+          Value: !Ref ProjectTag
+
+  ReceiptParserFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub casterly-receipt-parser-${Env}
+      CodeUri: receipt_parser
+      Handler: main.lambda_handler
+      Runtime: python3.12
+      Architectures:
+      - x86_64
+      Policies:
+        - S3ReadPolicy:
+            BucketName: !Sub ${CasterlyReceiptLandingBucketName}-${Env}  # instead of !Ref ReceiptsS3Bucket to prevent circular dependencies
+        - S3WritePolicy:
+            BucketName: !Sub ${CasterlyDLBucketName}-${Env}
+      Events:
+        S3Event:
+          Type: S3
+          Properties:
+            Bucket: !Ref ReceiptsS3Bucket
+            Events: s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: suffix
+                    Value: ".pdf"
+
+  ApplicationResourceGroup:
+    Type: AWS::ResourceGroups::Group
+    Properties:
+      Name:
+        Fn::Sub: ApplicationInsights-SAM-${AWS::StackName}
+      ResourceQuery:
+        Type: CLOUDFORMATION_STACK_1_0
+  ApplicationInsightsMonitoring:
+    Type: AWS::ApplicationInsights::Application
+    Properties:
+      ResourceGroupName:
+        Ref: ApplicationResourceGroup
+      AutoConfigurationEnabled: 'true'
