@@ -19,6 +19,7 @@ Parameters:
     AllowedValues:
       - dev
       - live
+    Default: dev
   CasterlyReceiptLandingBucketName:
     Type: AWS::SSM::Parameter::Value<String>
     Default: CasterlyReceiptLandingBucketName
