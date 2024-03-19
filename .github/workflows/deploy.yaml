@@ -28,7 +28,7 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/sam-deploy-casterly
           aws-region: eu-west-1
       - run: sam build --use-container
-      - run: \
+      - run: |
           sam deploy --parameter-overrides 'Env=${{ inputs.target-env }}'
           --stack-name casterly-app-${{ inputs.target-env }}
           --s3-prefix casterly-app-${{ inputs.target-env }}
