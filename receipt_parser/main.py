@@ -30,7 +30,7 @@ def lambda_handler(event, context):
         parser_class = CarrefourReceiptParser
     else:
         logger.error("Unexpected store '%s'", store_name)
-        raise Exception(f"Unexpected store '{store_name}'")
+        raise Exception(f"Unexpected store name '{store_name}'")
 
     with tempfile.NamedTemporaryFile(mode="w+b") as f:
         file_path = f"s3://{s3_bucket_name}/{s3_file_name}"
