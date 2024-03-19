@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   deploy:
-    name: 'Sam deploy to ${{ inputs.target-env }}'
+    name: 'SAM deployment to ${{ inputs.target-env }}'
     runs-on: ubuntu-latest
     steps:
       - name: Check Out Repo
@@ -27,5 +27,12 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/sam-deploy-casterly
           aws-region: eu-west-1
-      - run: sam build --use-container
-      - run: sam deploy --parameter-overrides 'Env=${{ inputs.target-env }}' --stack-name casterly-app-${{ inputs.target-env }} --s3-prefix casterly-app-${{ inputs.target-env }} --no-confirm-changeset --no-fail-on-empty-changeset
+      - name: Builds SAM project
+        run: sam build --use-container
+      - name: Deploys project to ${{ inputs.target-env }}
+        run: |
+            sam deploy --parameter-overrides 'Env=${{ inputs.target-env }}'
+            --stack-name casterly-app-${{ inputs.target-env }}
+            --s3-prefix casterly-app-${{ inputs.target-env }}
+            --no-confirm-changeset
+            --no-fail-on-empty-changeset
