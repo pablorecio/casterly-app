@@ -14,7 +14,7 @@ sb:
 	sam build
 
 deploy-dev: sv sb
-	sam deploy --parameter-overrides 'Env=dev' --no-fail-on-empty-changeset --stack-name casterly-app-dev
+	sam deploy --parameter-overrides 'Env=dev' --no-fail-on-empty-changeset --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM --stack-name casterly-app-dev
 
 deploy-live: sv sb
-	sam deploy --parameter-overrides 'Env=live' --no-fail-on-empty-changeset --stack-name casterly-app-live
+	sam deploy --parameter-overrides 'Env=live' --no-fail-on-empty-changeset --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM --stack-name casterly-app-live

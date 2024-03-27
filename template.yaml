@@ -56,6 +56,41 @@ Resources:
         - Key: project
           Value: !Ref ProjectTag
 
+  S3BucketAccessRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "glue.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns:
+        ['arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole']
+      RoleName: !Sub casterly-glue-role-${Env}
+      Policies:
+        - PolicyName: "S3BucketAccessPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "s3:GetObject"
+                  - "s3:PutObject"
+                Resource:
+                  - !Join
+                    - ''
+                    - - !GetAtt ReceiptsS3Bucket.Arn
+                      - "/*"
+                  - !Join
+                    - ''
+                    - - !GetAtt DLS3Bucket.Arn
+                      - "/*"
+
   ReceiptParserFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -81,6 +116,13 @@ Resources:
                 Rules:
                   - Name: suffix
                     Value: ".pdf"
+
+  GlueDatabase:
+    Type: AWS::Glue::Database
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseInput:
+        Name: !Sub casterly-receipts-db-${Env}
 
   ApplicationResourceGroup:
     Type: AWS::ResourceGroups::Group
