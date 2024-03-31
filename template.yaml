@@ -19,6 +19,7 @@ Parameters:
     AllowedValues:
       - dev
       - live
+      - test
     Default: dev
   CasterlyReceiptLandingBucketName:
     Type: AWS::SSM::Parameter::Value<String>
@@ -70,26 +71,22 @@ Resources:
               - "sts:AssumeRole"
       Path: "/"
       ManagedPolicyArns:
-        ['arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole']
+        - 'arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole'
+        - 'arn:aws:iam::aws:policy/AmazonS3FullAccess'
       RoleName: !Sub casterly-glue-role-${Env}
-      Policies:
-        - PolicyName: "S3BucketAccessPolicy"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: "Allow"
-                Action:
-                  - "s3:GetObject"
-                  - "s3:PutObject"
-                Resource:
-                  - !Join
-                    - ''
-                    - - !GetAtt ReceiptsS3Bucket.Arn
-                      - "/*"
-                  - !Join
-                    - ''
-                    - - !GetAtt DLS3Bucket.Arn
-                      - "/*"
+
+  GlueCrawler:
+    Type: AWS::Glue::Crawler
+    Properties:
+      Name: !Sub casterly-crawler-${Env}
+      Role: !GetAtt S3BucketAccessRole.Arn
+      DatabaseName: !Ref GlueDatabase
+      Targets:
+        S3Targets:
+          - Path: !Ref DLS3Bucket
+      SchemaChangePolicy:
+        UpdateBehavior: "UPDATE_IN_DATABASE"
+        DeleteBehavior: "LOG"
 
   ReceiptParserFunction:
     Type: AWS::Serverless::Function
