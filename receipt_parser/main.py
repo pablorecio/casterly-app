@@ -48,7 +48,7 @@ def lambda_handler(event, context):
     logger.info(output_json)
     s3_client.put_object(
         Bucket=DL_BUCKET,
-        Key=f"{user_id}/{store_name}/{receipt.datetime}.json",
+        Key=f"user_id={user_id}/store_name={store_name}/{receipt.datetime}.json",
         Body=output_json,
     )
 
