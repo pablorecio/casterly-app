@@ -83,7 +83,7 @@ Resources:
       DatabaseName: !Ref GlueDatabase
       Targets:
         S3Targets:
-          - Path: !Ref DLS3Bucket
+          - Path: !Sub s3://${CasterlyDLBucketName}-${Env}/user_receipts/
       SchemaChangePolicy:
         UpdateBehavior: "UPDATE_IN_DATABASE"
         DeleteBehavior: "LOG"
